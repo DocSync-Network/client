@@ -24,7 +24,7 @@ object ServiceLocator {
 
     fun setup() {
         val tokenService = SettingsTokenService()
-        register(tokenService)
+        register<TokenService>(tokenService)
 
         val httpClient = HttpClient(CIO) {
             install(WebSockets)
