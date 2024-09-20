@@ -64,7 +64,7 @@ class LoginViewModel(
                     if (result is Result.Success) {
                         _uiEvent.send(UiEvent.Success)
                     } else {
-                        _uiEvent.send(UiEvent.Error(result.data ?: "Unknown error"))
+                        _uiEvent.send(UiEvent.Error(result.message ?: "Unknown error"))
                     }
                 }
             }

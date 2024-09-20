@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dvir.docsync.auth.data.auth_type.AuthType
 import org.dvir.docsync.auth.data.requests.AuthRequest
@@ -15,7 +16,6 @@ import org.dvir.docsync.auth.domain.data_source.Token
 import org.dvir.docsync.core.constants.Constants
 import org.dvir.docsync.core.result.Result
 
-@OptIn(InternalAPI::class)
 class AuthDataSourceImpl(
     private val client: HttpClient
 ) : AuthDataSource {
@@ -36,12 +36,12 @@ class AuthDataSourceImpl(
             "${Constants.AUTH_URL}${if (type is AuthType.Signup) Constants.SIGNUP_ENDPOINT else Constants.LOGIN_ENDPOINT}"
         ){
             contentType(ContentType.Application.Json)
-            body = AuthRequest.Auth(username = username, password = password)
+            setBody(Json.encodeToString(AuthRequest.Auth(username = username, password = password)))
         }
         val authResponse = Json.decodeFromString<AuthResponse>(response.body())
 
         return if (authResponse is AuthResponse.ErrorResponse) {
-            Result.Error(authResponse.error)
+            Result.Error(message = authResponse.error)
         } else {
             authResponse as AuthResponse.AuthCompleted
             return Result.Success(authResponse.token)

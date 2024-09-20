@@ -29,11 +29,12 @@ class AuthRepositoryImpl(
                 else authDataSource.signup(username, password)
 
             if (result is Result.Error)
-                return Result.Error(result.message ?: "Unknown error")
+                return Result.Error(message = result.message ?: "Unknown error")
+
             tokenService.put(result.data!!)
             return Result.Success(result.data)
         } catch (e: Exception) {
-            Result.Error(e.message ?: "Unknown error")
+            Result.Error(message = e.message ?: "Unknown error")
         }
     }
 }

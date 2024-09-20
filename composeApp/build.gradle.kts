@@ -27,6 +27,8 @@ kotlin {
             implementation("io.ktor:ktor-client-core:3.0.0-rc-1")
             implementation("io.ktor:ktor-client-serialization:3.0.0-rc-1")
             implementation("io.ktor:ktor-client-websockets:3.0.0-rc-1")
+            implementation("io.ktor:ktor-client-content-negotiation:3.0.0-rc-1")
+            implementation("io.ktor:ktor-client-logging:3.0.0-rc-1")
             implementation("io.ktor:ktor-client-cio:3.0.0-rc-1")
 
             // Serialization
@@ -37,6 +39,11 @@ kotlin {
 
             // ViewModel
             implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+
+            // koin
+            implementation("io.insert-koin:koin-core:4.0.0")
+            implementation("io.insert-koin:koin-compose-viewmodel:4.0.0")
+            implementation("io.insert-koin:koin-compose-viewmodel-navigation:4.0.0")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
