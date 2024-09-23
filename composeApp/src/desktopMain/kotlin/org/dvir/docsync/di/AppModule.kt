@@ -11,7 +11,7 @@ import org.dvir.docsync.auth.data.service.SettingsTokenService
 import org.dvir.docsync.auth.domain.data_source.AuthDataSource
 import org.dvir.docsync.auth.domain.repository.AuthRepository
 import org.dvir.docsync.auth.domain.service.TokenService
-import org.dvir.docsync.auth.presentation.login.LoginViewModel
+import org.dvir.docsync.auth.presentation.login.viewmodel.LoginViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

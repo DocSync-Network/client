@@ -1,9 +1,9 @@
 package org.dvir.docsync
 
-import LoginScreen
+import org.dvir.docsync.auth.presentation.login.LoginScreen
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
-import org.dvir.docsync.auth.presentation.login.LoginViewModel
+import org.dvir.docsync.auth.presentation.login.viewmodel.LoginViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -13,7 +13,7 @@ fun App() {
     MaterialTheme {
         val loginViewModel: LoginViewModel = koinViewModel()
         LoginScreen(
-            loginViewModel = loginViewModel,
+            viewmodel = loginViewModel,
             onAuthSuccess = {
                 println("Login success")
             },

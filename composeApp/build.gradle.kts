@@ -40,6 +40,9 @@ kotlin {
             // ViewModel
             implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
 
+            // icons
+            implementation(compose.materialIconsExtended)
+
             // koin
             implementation("io.insert-koin:koin-core:4.0.0")
             implementation("io.insert-koin:koin-compose-viewmodel:4.0.0")

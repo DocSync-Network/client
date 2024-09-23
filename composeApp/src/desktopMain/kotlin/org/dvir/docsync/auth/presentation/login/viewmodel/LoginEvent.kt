@@ -1,4 +1,4 @@
-package org.dvir.docsync.auth.presentation.login
+package org.dvir.docsync.auth.presentation.login.viewmodel
 
 import androidx.compose.ui.focus.FocusState
 
