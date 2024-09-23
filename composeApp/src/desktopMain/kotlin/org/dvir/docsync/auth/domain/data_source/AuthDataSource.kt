@@ -7,4 +7,5 @@ typealias Token = String
 interface AuthDataSource {
     suspend fun login(username: String, password: String): Result<Token>
     suspend fun signup(username: String, password: String): Result<Token>
+    suspend fun validateToken(token: Token): Result<Boolean>
 }

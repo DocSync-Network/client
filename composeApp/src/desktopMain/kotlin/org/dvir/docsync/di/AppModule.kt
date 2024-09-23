@@ -13,6 +13,7 @@ import org.dvir.docsync.auth.domain.repository.AuthRepository
 import org.dvir.docsync.auth.domain.service.TokenService
 import org.dvir.docsync.auth.presentation.login.viewmodel.LoginViewModel
 import org.dvir.docsync.auth.presentation.signup.viewmodel.SignupViewModel
+import org.dvir.docsync.auth.presentation.splash.SplashViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -32,6 +33,9 @@ val appModule = module {
             authDataSource = get<AuthDataSource>(),
             tokenService = get<TokenService>(),
         )
+    }
+    viewModel<SplashViewModel> {
+        SplashViewModel(authRepository = get<AuthRepository>())
     }
     viewModel<LoginViewModel> {
         LoginViewModel(authRepository = get<AuthRepository>())

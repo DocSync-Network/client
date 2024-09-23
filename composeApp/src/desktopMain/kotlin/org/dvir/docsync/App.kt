@@ -5,6 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import org.dvir.docsync.auth.presentation.login.LoginScreen
 import org.dvir.docsync.auth.presentation.signup.SignupScreen
+import org.dvir.docsync.auth.presentation.splash.SplashScreen
 import org.dvir.docsync.core.navigation.Route
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -13,7 +14,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Preview
 fun App() {
     MaterialTheme {
-        var screen: Route by remember { mutableStateOf(Route.Login) }
+        var screen: Route by remember { mutableStateOf(Route.Splash) }
 
         Crossfade(targetState = screen) { currentScreen ->
             when (currentScreen) {
@@ -39,7 +40,17 @@ fun App() {
                         }
                     )
                 }
-                Route.Splash -> TODO()
+                Route.Splash -> {
+                    SplashScreen(
+                        viewmodel = koinViewModel(),
+                        onAuthSuccess = {
+                            screen = Route.Home
+                        },
+                        onNavigate = { route ->
+                            screen = route
+                        }
+                    )
+                }
                 Route.Home -> TODO()
             }
         }

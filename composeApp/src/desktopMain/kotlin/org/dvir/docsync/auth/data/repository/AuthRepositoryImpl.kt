@@ -19,6 +19,20 @@ class AuthRepositoryImpl(
         return authenticate(username, password, AuthType.Signup)
     }
 
+    override suspend fun validateToken(): Result<Boolean> {
+        return try {
+            val token = tokenService.get() ?: return Result.Success(false)
+            val result = authDataSource.validateToken(token)
+
+            if (result is Result.Error)
+                return Result.Error(message = result.message ?: "Unknown error")
+
+            return result
+        } catch (e: Exception) {
+            Result.Error(message = e.message ?: "Unknown error")
+        }
+    }
+
     private suspend fun authenticate(
         username: String,
         password: String,

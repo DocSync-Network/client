@@ -6,4 +6,5 @@ import org.dvir.docsync.core.result.Result
 interface AuthRepository {
     suspend fun login(username: String, password: String): Result<Token>
     suspend fun signup(username: String, password: String): Result<Token>
+    suspend fun validateToken(): Result<Boolean>
 }
