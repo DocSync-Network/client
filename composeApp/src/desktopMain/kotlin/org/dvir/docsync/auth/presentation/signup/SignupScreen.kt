@@ -1,4 +1,4 @@
-package org.dvir.docsync.auth.presentation.login
+package org.dvir.docsync.auth.presentation.signup
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -15,8 +15,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.dvir.docsync.auth.presentation.login.viewmodel.LoginEvent
-import org.dvir.docsync.auth.presentation.login.viewmodel.LoginViewModel
+import org.dvir.docsync.auth.presentation.signup.viewmodel.SignupEvent
+import org.dvir.docsync.auth.presentation.signup.viewmodel.SignupViewModel
 import org.dvir.docsync.core.navigation.Route
 import org.dvir.docsync.core.ui.PrimaryButton
 import org.dvir.docsync.core.ui.PrimaryColor
@@ -24,8 +24,8 @@ import org.dvir.docsync.core.ui.PrimaryTextField
 import org.dvir.docsync.core.ui.UiEvent
 
 @Composable
-fun LoginScreen(
-    viewmodel: LoginViewModel,
+fun SignupScreen(
+    viewmodel: SignupViewModel,
     onAuthSuccess: () -> Unit,
     onNavigate: (Route) -> Unit
 ) {
@@ -91,13 +91,13 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Welcome Back",
+                    text = "Join now",
                     style = TextStyle(fontSize = 36.sp, color = Color.DarkGray),
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
                 Text(
-                    text = "Log in and continue collaborating on your docs",
+                    text = "Sign up and start collaborating on your docs",
                     style = TextStyle(fontSize = 16.sp, color = Color.Gray),
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
@@ -106,14 +106,14 @@ fun LoginScreen(
                     value = viewmodel.usernameTextField.value.text,
                     onValueChange = { value ->
                         viewmodel.onEvent(
-                            LoginEvent.EnteredUsername(value)
+                            SignupEvent.EnteredUsername(value)
                         )
                     },
                     hint = "Username",
                     isHintVisible = viewmodel.usernameTextField.value.isHintVisible,
                     onFocusChange = {
                         viewmodel.onEvent(
-                            LoginEvent.ChangedUsernameFocus(it)
+                            SignupEvent.ChangedUsernameFocus(it)
                         )
                     },
                     icon = Icons.Default.Person,
@@ -125,14 +125,14 @@ fun LoginScreen(
                     value = viewmodel.passwordTextField.value.text,
                     onValueChange = { value ->
                         viewmodel.onEvent(
-                            LoginEvent.EnteredPassword(value)
+                            SignupEvent.EnteredPassword(value)
                         )
                     },
                     hint = "Password",
                     isHintVisible = viewmodel.passwordTextField.value.isHintVisible,
                     onFocusChange = {
                         viewmodel.onEvent(
-                            LoginEvent.ChangedPasswordFocus(it)
+                            SignupEvent.ChangedPasswordFocus(it)
                         )
                     },
                     icon = Icons.Default.Lock,
@@ -143,7 +143,7 @@ fun LoginScreen(
                     text = "Continue",
                     onClick = {
                         viewmodel.onEvent(
-                            LoginEvent.OnLogin
+                            SignupEvent.OnSignup
                         )
                     },
                     modifier = Modifier.width(240.dp)
@@ -152,14 +152,14 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Row {
-                    Text(text = "New to DocSync?")
+                    Text(text = "Already a member?")
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Sign Up",
+                        text = "Login",
                         color = PrimaryColor,
                         modifier = Modifier.clickable {
                             viewmodel.onEvent(
-                                LoginEvent.OnNavigateToSignup
+                                SignupEvent.OnNavigateToSignup
                             )
                         }
                     )
