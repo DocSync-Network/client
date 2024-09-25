@@ -52,7 +52,7 @@ class SignupViewModel(
             SignupEvent.OnSignup -> {
                 viewModelScope.launch {
                     isLoading.value = true
-                    val result = authRepository.login(
+                    val result = authRepository.signup(
                         username = usernameTextField.value.text,
                         password = passwordTextField.value.text
                     )
