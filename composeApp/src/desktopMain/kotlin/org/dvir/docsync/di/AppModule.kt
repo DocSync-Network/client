@@ -14,18 +14,29 @@ import org.dvir.docsync.auth.domain.service.TokenService
 import org.dvir.docsync.auth.presentation.login.viewmodel.LoginViewModel
 import org.dvir.docsync.auth.presentation.signup.viewmodel.SignupViewModel
 import org.dvir.docsync.auth.presentation.splash.SplashViewModel
+import org.dvir.docsync.doc.data.data_source.DocsDataSource
+import org.dvir.docsync.doc.data.repository.DocsResponsesRepositoryImpl
+import org.dvir.docsync.doc.data.repository.DocActionRepositoryImpl
+import org.dvir.docsync.doc.data.repository.DocListRepositoryImpl
+import org.dvir.docsync.doc.domain.cursor.CursorManager
+import org.dvir.docsync.doc.domain.model.Document
+import org.dvir.docsync.doc.domain.repository.DocActionRepository
+import org.dvir.docsync.doc.domain.repository.DocListRepository
+import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
+import org.dvir.docsync.doc.presentation.home.viewmodel.HomeViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
+    val httpClient = HttpClient(CIO) {
+        install(ContentNegotiation)
+        install(Logging)
+        install(WebSockets)
+    }
+
     // auth
     single<TokenService> { SettingsTokenService() }
     single<AuthDataSource> {
-        val httpClient = HttpClient(CIO) {
-            install(ContentNegotiation)
-            install(Logging)
-            install(WebSockets)
-        }
         AuthDataSourceImpl(httpClient)
     }
     single<AuthRepository> {
@@ -42,5 +53,32 @@ val appModule = module {
     }
     viewModel<SignupViewModel> {
         SignupViewModel(authRepository = get<AuthRepository>())
+    }
+
+    // docs
+    single<DocsDataSource> {
+        DocsDataSource(httpClient)
+    }
+    single<DocListRepository> {
+        DocListRepositoryImpl(dataSource = get<DocsDataSource>())
+    }
+    single<DocsResponsesRepository> {
+        DocsResponsesRepositoryImpl(
+            docsDataSource = get<DocsDataSource>(),
+            tokenService = get<TokenService>(),
+        )
+    }
+    factory<DocActionRepository> { (document: Document, cursorManager: CursorManager) ->
+        DocActionRepositoryImpl(
+            dataSource = get<DocsDataSource>(),
+            cursorManager = cursorManager,
+            document = document
+        )
+    }
+    viewModel<HomeViewModel> {
+        HomeViewModel(
+            docListRepository = get<DocListRepository>(),
+            docsResponsesRepository = get<DocsResponsesRepository>()
+        )
     }
 }
