@@ -54,7 +54,10 @@ fun App() {
                 }
                 Route.Home -> {
                     HomeScreen(
-                        viewmodel = koinViewModel()
+                        viewmodel = koinViewModel(),
+                        onNavigateToDoc = {
+
+                        }
                     )
                 }
                 is Route.Doc -> {
