@@ -10,6 +10,6 @@ sealed class DocListResponse {
     @SerialName("doc")
     data class Doc(val doc: Document) : DocListResponse()
     @Serializable
-    @SerialName("Docs")
+    @SerialName("docs")
     data class Docs(val docs: List<Document>) : DocListResponse()
 }
