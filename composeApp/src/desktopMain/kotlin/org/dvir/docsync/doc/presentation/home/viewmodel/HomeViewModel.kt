@@ -7,6 +7,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import org.dvir.docsync.core.navigation.Route
 import org.dvir.docsync.core.ui.UiEvent
 import org.dvir.docsync.doc.data.responses.DocListResponse
 import org.dvir.docsync.doc.data.responses.DocResponse
@@ -39,7 +40,11 @@ class HomeViewModel(
                     is DocResponse.ListResponse -> {
                         when (val listResponse = response.response) {
                             is DocListResponse.Doc -> {
-
+                                _uiEvent.send(
+                                    UiEvent.Navigate(
+                                        to = Route.Doc(doc = listResponse.doc)
+                                    )
+                                )
                             }
                             is DocListResponse.Docs -> {
                                 docs.value = listResponse.docs
@@ -74,8 +79,7 @@ class HomeViewModel(
                     docListRepository.removeDoc(event.docId)
                 }
                 is HomeEvent.GetDoc -> {
-                    docListRepository.getAllDocs()
-                    //docListRepository.getDoc(event.docId)
+                    docListRepository.getDoc(event.docId)
                 }
             }
         }

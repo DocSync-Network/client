@@ -1,5 +1,7 @@
 package org.dvir.docsync.core.navigation
 
+import org.dvir.docsync.doc.domain.model.Document
+
 sealed class Route() {
     // auth
     data object Splash : Route()
@@ -8,4 +10,5 @@ sealed class Route() {
 
     // docs
     data object Home : Route()
+    data class Doc(val doc: Document) : Route()
 }

@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("plugin.serialization") version "2.0.20"
 }
 
 kotlin {
@@ -32,7 +32,7 @@ kotlin {
             implementation("io.ktor:ktor-client-cio:3.0.0-rc-1")
 
             // Serialization
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
             // Key value data storage
             implementation("com.russhwolf:multiplatform-settings-no-arg:1.2.0")
