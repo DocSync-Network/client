@@ -3,7 +3,6 @@ package org.dvir.docsync.doc.presentation.home.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -33,7 +32,7 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch {
-            async { docsResponsesRepository.connect() }.await()
+            docsResponsesRepository.connect()
             docListRepository.getAllDocs()
             docsResponsesRepository.responseFlow.collect { response ->
                 when (response) {

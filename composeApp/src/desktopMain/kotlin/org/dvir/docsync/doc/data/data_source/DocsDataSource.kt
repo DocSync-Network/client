@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.encodeToString
@@ -25,6 +26,7 @@ class DocsDataSource(
 ) {
     private var currentState: UserState = UserState.InMain
     private lateinit var session: WebSocketSession
+    private val sessionInitialized = CompletableDeferred<Unit>()
 
     suspend fun connect(token: String): Flow<DocResponse> = flow {
         httpClient.webSocket(
@@ -36,6 +38,7 @@ class DocsDataSource(
             }
         ) {
             session = this
+            sessionInitialized.complete(Unit)
             try {
                 for (frame in incoming) {
                     if (frame is Frame.Text) {
@@ -59,6 +62,7 @@ class DocsDataSource(
     }
 
     suspend fun sendDocListAction(action: DocListAction) {
+        sessionInitialized.await()
         session.send(Frame.Text(Json.encodeToString(action)))
     }
 
