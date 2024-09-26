@@ -57,6 +57,9 @@ fun App() {
                         viewmodel = koinViewModel()
                     )
                 }
+                is Route.Doc -> {
+
+                }
             }
         }
     }
