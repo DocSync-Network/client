@@ -74,6 +74,9 @@ class HomeViewModel(
                 HomeEvent.OpenCreateDialog -> {
                     isCreateDialogOpened.value = true
                 }
+                HomeEvent.CloseCreateDialog -> {
+                    isCreateDialogOpened.value = false
+                }
                 is HomeEvent.DeleteDoc -> {
                     docListRepository.removeDoc(event.docId)
                 }

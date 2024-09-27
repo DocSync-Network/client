@@ -7,21 +7,22 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.dvir.docsync.core.navigation.Route
-import org.dvir.docsync.core.ui.BackgroundColor
-import org.dvir.docsync.core.ui.PrimaryColor
-import org.dvir.docsync.core.ui.SecondaryColor
-import org.dvir.docsync.core.ui.TextColor
+import org.dvir.docsync.core.ui.*
 import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.presentation.home.viewmodel.HomeEvent
 import org.dvir.docsync.doc.presentation.home.viewmodel.HomeViewModel
@@ -35,6 +36,26 @@ fun HomeScreen(
     viewmodel: HomeViewModel,
     onNavigateToDoc: (Route.Doc) -> Unit
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(true) {
+        viewmodel.uiEvent.collect { event ->
+            when (event) {
+                is UiEvent.Error -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message
+                    )
+                }
+                is UiEvent.Navigate -> {
+                    if (event.to is Route.Doc) {
+                        onNavigateToDoc(event.to)
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -52,7 +73,19 @@ fun HomeScreen(
                     tint = BackgroundColor
                 )
             }
-        }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        backgroundColor = ErrorColor,
+                        actionColor = BackgroundColor
+                    )
+                }
+            )
+        },
     ) {
         Column(
             modifier = Modifier
@@ -94,8 +127,11 @@ fun HomeScreen(
 
         if (viewmodel.isCreateDialogOpened.value) {
             CreateDocDialog(
-                viewModel = viewmodel,
-                onDismiss = { viewmodel.onEvent(HomeEvent.OpenCreateDialog) },
+                nameValue = viewmodel.createDialogDocName.value,
+                onNameValueChange = {
+                    viewmodel.createDialogDocName.value = it
+                },
+                onDismiss = { viewmodel.onEvent(HomeEvent.CloseCreateDialog) },
                 onCreate = { viewmodel.onEvent(HomeEvent.CreateDoc) }
             )
         }
@@ -159,28 +195,43 @@ fun DocumentCard(
 }
 
 @Composable
-fun CreateDocDialog(viewModel: HomeViewModel, onDismiss: () -> Unit, onCreate: () -> Unit) {
+fun CreateDocDialog(
+    nameValue: String,
+    onNameValueChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onCreate: () -> Unit
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Create New Document") },
         text = {
             Column {
                 OutlinedTextField(
-                    value = viewModel.createDialogDocName.value,
-                    onValueChange = { viewModel.createDialogDocName.value = it },
+                    value = nameValue,
+                    onValueChange = onNameValueChange,
                     label = { Text("Document Name") },
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = PrimaryColor
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
         },
         confirmButton = {
-            Button(onClick = onCreate) {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = PrimaryColor,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(25.dp),
+                onClick = onCreate
+            ) {
                 Text("Create")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Cancel", color = PrimaryColor)
             }
         }
     )

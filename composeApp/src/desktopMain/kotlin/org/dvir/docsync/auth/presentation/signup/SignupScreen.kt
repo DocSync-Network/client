@@ -18,10 +18,7 @@ import androidx.compose.ui.unit.sp
 import org.dvir.docsync.auth.presentation.signup.viewmodel.SignupEvent
 import org.dvir.docsync.auth.presentation.signup.viewmodel.SignupViewModel
 import org.dvir.docsync.core.navigation.Route
-import org.dvir.docsync.core.ui.PrimaryButton
-import org.dvir.docsync.core.ui.PrimaryColor
-import org.dvir.docsync.core.ui.PrimaryTextField
-import org.dvir.docsync.core.ui.UiEvent
+import org.dvir.docsync.core.ui.*
 
 @Composable
 fun SignupScreen(
@@ -66,8 +63,8 @@ fun SignupScreen(
                 snackbar = { data ->
                     Snackbar(
                         snackbarData = data,
-                        backgroundColor = Color.Red,
-                        actionColor = Color.White
+                        backgroundColor = ErrorColor,
+                        actionColor = BackgroundColor
                     )
                 }
             )
