@@ -47,7 +47,6 @@ class HomeViewModel(
                             }
                             is DocListResponse.Docs -> {
                                 docs.value = listResponse.docs
-                                println(docs.value)
                             }
                         }
                     }
