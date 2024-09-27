@@ -214,9 +214,14 @@ fun CreateDocDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New Document") },
         text = {
             Column {
+                Text(
+                    text = "Create New Document",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = nameValue,
                     onValueChange = onNameValueChange,
