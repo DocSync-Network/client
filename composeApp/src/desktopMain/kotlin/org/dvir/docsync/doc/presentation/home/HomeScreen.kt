@@ -11,12 +11,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -146,6 +147,7 @@ fun DocumentCard(
 ) {
     Column(
         modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
             .background(SecondaryColor)
             .clickable(
                 onClick = onClick
@@ -153,7 +155,10 @@ fun DocumentCard(
             .padding(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier.padding(
+                horizontal = 8.dp,
+                vertical = 4.dp
+            )
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -163,32 +168,38 @@ fun DocumentCard(
                     text = document.name,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,
+                    color = TextColor
                 )
-                Spacer(modifier = Modifier.width(40.dp))
+
+                Spacer(modifier = Modifier.weight(1f))
+
                 Icon(
-                    imageVector = Icons.Outlined.Delete,
+                    imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
                     tint = TextColor,
-                    modifier = Modifier.clickable {
-                        onDelete()
-                    }
+                    modifier = Modifier
+                        .clickable { onDelete() }
                 )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Owner: ${document.owner}",
                 fontSize = 16.sp,
-                modifier = Modifier.padding(top = 16.dp)
+                color = TextColor,
+                modifier = Modifier.padding(top = 4.dp)
             )
 
             val creationDate = LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(document.creationDate),
                 ZoneId.systemDefault()
-            ).format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+            ).format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"))
 
             Text(
                 text = creationDate,
                 fontSize = 16.sp,
+                color = TextColor
             )
         }
     }
@@ -203,9 +214,14 @@ fun CreateDocDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New Document") },
         text = {
             Column {
+                Text(
+                    text = "Create New Document",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = nameValue,
                     onValueChange = onNameValueChange,
@@ -213,6 +229,7 @@ fun CreateDocDialog(
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = PrimaryColor
                     ),
+                    maxLines = 1,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
