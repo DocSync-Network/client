@@ -9,6 +9,7 @@ interface DocActionRepository {
     suspend fun removeCharacter(username: String)
     suspend fun editCharacter(username: String, config: CharacterConfig)
     suspend fun updateCursor(cursorData: CursorData, username: String)
+    fun getCursors(): HashMap<String, CursorData>
     suspend fun saveDocument()
     suspend fun closeDocument()
 }
