@@ -20,7 +20,10 @@ class DocActionRepositoryImpl(
 ) : DocActionRepository {
     override suspend fun addCharacter(char: Character, username: String) {
         val cursorData = cursorManager.getCursors()[username] ?: return
-        val (startPos, endPos) = cursorData
+        var (startPos, endPos) = cursorData
+
+        if (positionToIndex(startPos) != document.content.size)
+            startPos = indexToPosition(positionToIndex(startPos) - 1)
 
         if (endPos != null) {
             removeSelection(username, startPos, endPos)

@@ -365,7 +365,6 @@ fun CustomTextEditor(
     onCursorChanged: (Int) -> Unit,
     onSelectionChanged: (IntRange) -> Unit,
     config: CharacterConfig,
-    fontSize: Int = 16,
     focusRequester: FocusRequester,
 ) {
     BasicTextField(
@@ -416,9 +415,6 @@ fun CustomTextEditor(
             )
             .border(1.dp, SurfaceColor)
             .padding(24.dp),
-        textStyle = TextStyle(
-            fontSize = fontSize.sp
-        )
     )
 }
 
@@ -433,7 +429,8 @@ fun annotatedStringFromDocument(document: List<Character>): AnnotatedString {
                             fontWeight = if (character.config.isBold) FontWeight.Bold else FontWeight.Normal,
                             fontStyle = if (character.config.isItalic) FontStyle.Italic else FontStyle.Normal,
                             textDecoration = if (character.config.isUnderlined) TextDecoration.Underline else TextDecoration.None,
-                            color = colorFromHex(character.config.color)
+                            color = colorFromHex(character.config.color),
+                            fontSize = character.config.fontSize.sp
                         ).toSpanStyle()
                     ) {
                         append(character.char.toString())
