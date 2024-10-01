@@ -130,12 +130,10 @@ fun DocScreen(
                     .background(PrimaryColor),
                 contentAlignment = Alignment.Center
             ) {
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -156,7 +154,7 @@ fun DocScreen(
                         }
                         Text(
                             text = document.name,
-                            fontSize = 24.sp,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
                             color = BackgroundColor
                         )
@@ -176,6 +174,7 @@ fun DocScreen(
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Row(
+                        modifier = Modifier.align(Alignment.Center),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
@@ -278,7 +277,7 @@ fun DocScreen(
                             }
                             Text(
                                 text = viewModel.fontSize.toString(),
-                                fontSize = 24.sp,
+                                fontSize = 16.sp,
                                 color = BackgroundColor
                             )
                             IconButton(
@@ -298,14 +297,14 @@ fun DocScreen(
                     }
                     Text(
                         text = "Access",
-                        fontSize = 24.sp,
+                        fontSize = 16.sp,
                         color = BackgroundColor,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.clickable {
                             viewModel.onDocEvent(
                                 DocEvent.OpenAccessDialog
                             )
-                        }
+                        }.align(Alignment.CenterEnd)
                     )
                 }
             }
@@ -390,7 +389,12 @@ fun CustomTextEditor(
                 } else {
                     newText.last()
                 }
-                val character = Character.Visible(addedChar, config)
+
+                val character = when (addedChar) {
+                    '\n' -> Character.BreakLine
+                    ' ' -> Character.Space
+                    else -> Character.Visible(addedChar, config)
+                }
                 onTextAdd(character)
             } else if (newText.length < oldText.length) {
                 onTextRemove()
