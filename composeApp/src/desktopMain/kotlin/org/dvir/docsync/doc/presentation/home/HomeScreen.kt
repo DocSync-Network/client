@@ -11,12 +11,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,13 +37,13 @@ fun HomeScreen(
     viewmodel: HomeViewModel,
     onNavigateToDoc: (Route.Doc) -> Unit
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(true) {
         viewmodel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.Error -> {
-                    snackbarHostState.showSnackbar(
+                    snackBarHostState.showSnackbar(
                         message = event.message
                     )
                 }
@@ -76,7 +77,7 @@ fun HomeScreen(
         },
         snackbarHost = {
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = snackBarHostState,
                 snackbar = { data ->
                     Snackbar(
                         snackbarData = data,
@@ -146,11 +147,13 @@ fun DocumentCard(
 ) {
     Column(
         modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
             .background(SecondaryColor)
             .clickable(
                 onClick = onClick
             )
             .padding(16.dp)
+
     ) {
         Column(
             modifier = Modifier.padding(12.dp)
@@ -164,9 +167,9 @@ fun DocumentCard(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
-                Spacer(modifier = Modifier.width(40.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 Icon(
-                    imageVector = Icons.Outlined.Delete,
+                    imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
                     tint = TextColor,
                     modifier = Modifier.clickable {
@@ -203,9 +206,14 @@ fun CreateDocDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New Document") },
         text = {
             Column {
+                Text(
+                    text = "Create New Document",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = nameValue,
                     onValueChange = onNameValueChange,

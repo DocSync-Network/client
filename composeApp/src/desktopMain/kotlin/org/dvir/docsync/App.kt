@@ -7,9 +7,12 @@ import org.dvir.docsync.auth.presentation.login.LoginScreen
 import org.dvir.docsync.auth.presentation.signup.SignupScreen
 import org.dvir.docsync.auth.presentation.splash.SplashScreen
 import org.dvir.docsync.core.navigation.Route
+import org.dvir.docsync.doc.domain.cursor.CursorManager
+import org.dvir.docsync.doc.presentation.doc.DocScreen
 import org.dvir.docsync.doc.presentation.home.HomeScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 @Preview
@@ -56,12 +59,25 @@ fun App() {
                     HomeScreen(
                         viewmodel = koinViewModel(),
                         onNavigateToDoc = {
-
+                            screen = it
                         }
                     )
                 }
                 is Route.Doc -> {
-
+                    DocScreen(
+                        viewModel = koinViewModel(
+                            parameters = {
+                                parametersOf(
+                                    currentScreen.doc,
+                                    CursorManager()
+                                )
+                            }
+                        ),
+                        document = currentScreen.doc,
+                        onNavigateBack = {
+                            screen = Route.Home
+                        }
+                    )
                 }
             }
         }

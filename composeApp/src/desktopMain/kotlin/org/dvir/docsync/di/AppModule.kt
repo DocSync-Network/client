@@ -23,8 +23,10 @@ import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.domain.repository.DocActionRepository
 import org.dvir.docsync.doc.domain.repository.DocListRepository
 import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
+import org.dvir.docsync.doc.presentation.doc.viewmodel.DocViewModel
 import org.dvir.docsync.doc.presentation.home.viewmodel.HomeViewModel
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val appModule = module {
@@ -79,6 +81,12 @@ val appModule = module {
         HomeViewModel(
             docListRepository = get<DocListRepository>(),
             docsResponsesRepository = get<DocsResponsesRepository>()
+        )
+    }
+    viewModel { (document: Document, cursorManager: CursorManager) ->
+        DocViewModel(
+            docActionRepository = get { parametersOf(document, cursorManager) },
+            docsResponsesRepository = get()
         )
     }
 }

@@ -15,7 +15,7 @@ data class Document(
     val access: MutableList<String>,
     val content: MutableList<Character>,
 ) {
-    fun editCharacters(characterConfig: CharacterConfig, cursorData: CursorData) {
+    fun editCharacters(config: CharacterConfig, cursorData: CursorData) {
         if (cursorData.end == null) return
 
         val start = positionToIndex(cursorData.start)
@@ -27,13 +27,7 @@ data class Document(
             val character = sublist[i]
             if (character is Character.Visible) {
                 sublist[i] = character.copy(
-                    config = CharacterConfig(
-                        isBold = characterConfig.isBold,
-                        isItalic = characterConfig.isItalic,
-                        isUnderlined = characterConfig.isUnderlined,
-                        color = characterConfig.color,
-                        fontSize = characterConfig.fontSize
-                    )
+                    config = config
                 )
             }
         }

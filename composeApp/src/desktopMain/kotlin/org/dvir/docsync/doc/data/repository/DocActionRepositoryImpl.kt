@@ -11,6 +11,7 @@ import org.dvir.docsync.doc.domain.model.CharacterConfig
 import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.domain.repository.DocActionRepository
 import org.dvir.docsync.doc.domain.model.Character
+import java.util.concurrent.ConcurrentHashMap
 
 class DocActionRepositoryImpl(
     private val dataSource: DocsDataSource,
@@ -69,7 +70,9 @@ class DocActionRepositoryImpl(
         document.editCharacters(config, cursorData)
         if (username == DocConstants.OWN_USERNAME) {
             dataSource.sendDocAction(
-                DocAction.Edit(config)
+                DocAction.Edit(
+                    config = config
+                )
             )
         }
     }
@@ -87,9 +90,28 @@ class DocActionRepositoryImpl(
         }
     }
 
+    override fun getCursors(): ConcurrentHashMap<String, CursorData> = cursorManager.getCursors()
+    override fun getConfig(cursorPosition: CursorPosition): CharacterConfig {
+        val character = document.content[positionToIndex(cursorPosition)]
+
+        return if (character is Character.Visible) {
+            character.config
+        } else {
+            CharacterConfig(
+                isBold = false,
+                isItalic = false,
+                isUnderlined = false,
+                color = "#000000",
+                fontSize = 11
+            )
+        }
+    }
+
     override suspend fun saveDocument() {
         dataSource.sendDocAction(DocAction.Save)
     }
+
+
 
     override suspend fun closeDocument() {
         // TODO
