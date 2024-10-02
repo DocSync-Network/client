@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -310,48 +311,54 @@ fun DocScreen(
             }
         }
     ) {
-        CustomTextEditor(
-            document = document.content,
-            onTextAdd = {
-                viewModel.onDocEvent(
-                    DocEvent.AddCharacter(it)
-                )
-            },
-            onTextRemove = {
-                viewModel.onDocEvent(
-                    DocEvent.RemoveCharacter
-                )
-            },
-            onCursorChanged = {
-                viewModel.onDocEvent(
-                    DocEvent.UpdateCursor(
-                        CursorData(
-                            start = indexToPosition(document.content, it)
+        Row (
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            CustomTextEditor(
+                document = document.content,
+                onTextAdd = {
+                    viewModel.onDocEvent(
+                        DocEvent.AddCharacter(it)
+                    )
+                },
+                onTextRemove = {
+                    viewModel.onDocEvent(
+                        DocEvent.RemoveCharacter
+                    )
+                },
+                onCursorChanged = {
+                    viewModel.onDocEvent(
+                        DocEvent.UpdateCursor(
+                            CursorData(
+                                start = indexToPosition(document.content, it)
+                            )
                         )
                     )
-                )
-            },
-            onSelectionChanged = {
-                viewModel.onDocEvent(
-                    DocEvent.UpdateCursor(
-                        CursorData(
-                            start = indexToPosition(document.content, it.first),
-                            end = indexToPosition(document.content, it.last)
+                },
+                onSelectionChanged = {
+                    viewModel.onDocEvent(
+                        DocEvent.UpdateCursor(
+                            CursorData(
+                                start = indexToPosition(document.content, it.first),
+                                end = indexToPosition(document.content, it.last)
+                            )
                         )
                     )
-                )
-            },
-            config = CharacterConfig(
-                isBold = viewModel.isBold,
-                isItalic = viewModel.isItalic,
-                isUnderlined = viewModel.isUnderlined,
-                color = String.format("#%08X", viewModel.color.toArgb()),
-                fontSize = viewModel.fontSize
-            ),
-            focusRequester = focusRequester,
-            textFieldValue = textFieldValue,
-            savedSelection = savedSelection
-        )
+                },
+                config = CharacterConfig(
+                    isBold = viewModel.isBold,
+                    isItalic = viewModel.isItalic,
+                    isUnderlined = viewModel.isUnderlined,
+                    color = String.format("#%08X", viewModel.color.toArgb()),
+                    fontSize = viewModel.fontSize
+                ),
+                focusRequester = focusRequester,
+                textFieldValue = textFieldValue,
+                savedSelection = savedSelection
+            )
+        }
     }
 }
 
@@ -405,13 +412,12 @@ fun CustomTextEditor(
             )
         },
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxHeight()
+            .fillMaxWidth(0.7f)
             .focusRequester(focusRequester)
             .background(BackgroundColor)
             .padding(
                 top = 32.dp,
-                start = 124.dp,
-                end = 124.dp
             )
             .border(1.dp, SurfaceColor)
             .padding(24.dp),
