@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.dvir.docsync.auth.domain.service.TokenService
 import org.dvir.docsync.doc.data.data_source.DocsDataSource
+import org.dvir.docsync.doc.data.data_source.UserState
+import org.dvir.docsync.doc.data.responses.DocListResponse
 import org.dvir.docsync.doc.data.responses.DocResponse
 import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
 
@@ -22,6 +24,12 @@ class DocsResponsesRepositoryImpl(
         CoroutineScope(Dispatchers.IO).launch {
             val token = tokenService.get()!!
             docsDataSource.connect(token).collect { response ->
+                if (
+                    response is DocResponse.ListResponse
+                    && response.response is DocListResponse.Doc
+                ) {
+                    docsDataSource.currentState = UserState.InDocument
+                }
                 _responseFlow.emit(response)
             }
         }

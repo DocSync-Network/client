@@ -24,7 +24,7 @@ sealed interface UserState {
 class DocsDataSource(
     private val httpClient: HttpClient,
 ) {
-    private var currentState: UserState = UserState.InMain
+    var currentState: UserState = UserState.InMain
     private lateinit var session: WebSocketSession
     private val sessionInitialized = CompletableDeferred<Unit>()
 
