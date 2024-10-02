@@ -69,4 +69,9 @@ class DocsDataSource(
     suspend fun sendDocAction(action: DocAction) {
         session.send(Frame.Text(Json.encodeToString(action)))
     }
+
+    suspend fun leaveDoc() {
+        session.send(Frame.Text(Json.encodeToString(DocAction.LeaveDoc)))
+        currentState = UserState.InMain
+    }
 }

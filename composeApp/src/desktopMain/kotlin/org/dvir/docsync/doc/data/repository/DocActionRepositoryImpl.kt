@@ -117,7 +117,7 @@ class DocActionRepositoryImpl(
 
 
     override suspend fun closeDocument() {
-        // TODO
+        dataSource.leaveDoc()
     }
 
     private fun removeSelection(username: String, startPos: CursorPosition, endPos: CursorPosition) {

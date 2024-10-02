@@ -29,4 +29,7 @@ sealed class DocAction {
     @Serializable
     @SerialName("save")
     data object Save : DocAction()
+    @Serializable
+    @SerialName("leaveDoc")
+    data object LeaveDoc : DocAction()
 }

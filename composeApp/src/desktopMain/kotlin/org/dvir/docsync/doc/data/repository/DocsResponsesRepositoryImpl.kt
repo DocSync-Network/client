@@ -27,9 +27,7 @@ class DocsResponsesRepositoryImpl(
                 if (
                     response is DocResponse.ListResponse
                     && response.response is DocListResponse.Doc
-                ) {
-                    docsDataSource.currentState = UserState.InDocument
-                }
+                ) docsDataSource.currentState = UserState.InDocument
                 _responseFlow.emit(response)
             }
         }
