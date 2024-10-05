@@ -11,6 +11,8 @@ import org.dvir.docsync.doc.domain.model.CharacterConfig
 import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.domain.repository.DocActionRepository
 import org.dvir.docsync.doc.domain.model.Character
+import org.dvir.docsync.doc.domain.utils.CursorPosition.indexToPosition
+import org.dvir.docsync.doc.domain.utils.CursorPosition.positionToIndex
 import java.util.concurrent.ConcurrentHashMap
 
 class DocActionRepositoryImpl(
@@ -20,10 +22,7 @@ class DocActionRepositoryImpl(
 ) : DocActionRepository {
     override suspend fun addCharacter(char: Character, username: String) {
         val cursorData = cursorManager.getCursors()[username] ?: return
-        var (startPos, endPos) = cursorData
-
-        if (positionToIndex(startPos) != document.content.size)
-            startPos = indexToPosition(positionToIndex(startPos) - 1)
+        val (startPos, endPos) = cursorData
 
         if (endPos != null) {
             removeSelection(username, startPos, endPos)
@@ -34,7 +33,7 @@ class DocActionRepositoryImpl(
 
         cursorManager.adjustCursors(startPos, CursorAction.Add)
 
-        val newCursorPosition = indexToPosition(positionToIndex(startPos) + 1)
+        val newCursorPosition = indexToPosition(document.content, positionToIndex(document.content, startPos) + 1)
         cursorManager.updatePosition(username, newCursorPosition)
 
         if (username == DocConstants.OWN_USERNAME) {
@@ -95,7 +94,7 @@ class DocActionRepositoryImpl(
 
     override fun getCursors(): ConcurrentHashMap<String, CursorData> = cursorManager.getCursors()
     override fun getConfig(cursorPosition: CursorPosition): CharacterConfig {
-        val character = document.content[positionToIndex(cursorPosition)]
+        val character = document.content[positionToIndex(document.content, cursorPosition)]
 
         return if (character is Character.Visible) {
             character.config
@@ -104,7 +103,7 @@ class DocActionRepositoryImpl(
                 isBold = false,
                 isItalic = false,
                 isUnderlined = false,
-                color = "#000000",
+                color = "#FF000000",
                 fontSize = 11
             )
         }
@@ -121,8 +120,8 @@ class DocActionRepositoryImpl(
     }
 
     private fun removeSelection(username: String, startPos: CursorPosition, endPos: CursorPosition) {
-        val startIndex = positionToIndex(startPos)
-        val endIndex = positionToIndex(endPos)
+        val startIndex = positionToIndex(document.content, startPos)
+        val endIndex = positionToIndex(document.content, endPos)
 
         if (startIndex > endIndex) {
             throw IllegalArgumentException("Start position must be before end position")
@@ -131,46 +130,10 @@ class DocActionRepositoryImpl(
         document.content.subList(startIndex, endIndex).clear()
 
         for (i in startIndex until endIndex) {
-            val position = indexToPosition(i)
+            val position = indexToPosition(document.content, i)
             cursorManager.adjustCursors(position, CursorAction.Remove)
         }
 
         cursorManager.updatePosition(username, startPos)
-    }
-
-    private fun indexToPosition(index: Int): CursorPosition {
-        var line = 0
-        var column = 0
-        for (i in 0 until index) {
-            if (i >= document.content.size) break
-            when (document.content[i]) {
-                is Character.BreakLine -> {
-                    line++
-                    column = 0
-                }
-                else -> column++
-            }
-        }
-        return CursorPosition(line, column)
-    }
-
-    private fun positionToIndex(position: CursorPosition): Int {
-        var index = 0
-        var line = 0
-        var column = 0
-        while (line < position.line || (line == position.line && column < position.column)) {
-            if (index >= document.content.size) {
-                break
-            }
-            when (document.content[index]) {
-                is Character.BreakLine -> {
-                    line++
-                    column = 0
-                }
-                else -> column++
-            }
-            index++
-        }
-        return index
     }
 }

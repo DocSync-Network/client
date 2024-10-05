@@ -86,7 +86,8 @@ val appModule = module {
     viewModel { (document: Document, cursorManager: CursorManager) ->
         DocViewModel(
             docActionRepository = get { parametersOf(document, cursorManager) },
-            docsResponsesRepository = get()
+            docsResponsesRepository = get(),
+            document = document
         )
     }
 }

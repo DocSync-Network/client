@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
@@ -18,13 +20,25 @@ import org.dvir.docsync.doc.data.responses.DocResponse
 import org.dvir.docsync.doc.domain.cursor.CursorData
 import org.dvir.docsync.doc.domain.model.Character
 import org.dvir.docsync.doc.domain.model.CharacterConfig
+import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.domain.repository.DocActionRepository
 import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
+import org.dvir.docsync.doc.domain.utils.Colors.colorFromHex
+import org.dvir.docsync.doc.domain.utils.CursorPosition.positionToIndex
+import org.dvir.docsync.doc.presentation.doc.annotatedStringFromDocument
 
 class DocViewModel(
     private val docActionRepository: DocActionRepository,
     private val docsResponsesRepository: DocsResponsesRepository,
+    private val document: Document
 ) : ViewModel() {
+    private val _textFieldValue = mutableStateOf(
+        TextFieldValue(annotatedStringFromDocument(document.content))
+    )
+    val textFieldValue = _textFieldValue
+    private val _savedSelection = mutableStateOf(TextRange(0, 0))
+    val savedSelection = _savedSelection
+
     var isAccessDialogOpen by mutableStateOf(false)
     var isColorDialogOpen by mutableStateOf(false)
     var isBold by mutableStateOf(false)
@@ -90,6 +104,9 @@ class DocViewModel(
     }
 
     fun onEditEvent(event: EditEvent) {
+        _textFieldValue.value = textFieldValue.value.copy(
+            selection = savedSelection.value
+        )
         when (event) {
             is EditEvent.ChangeColor -> color = event.color
             EditEvent.DecreaseFontSize -> fontSize--
@@ -125,24 +142,42 @@ class DocViewModel(
     private fun handleAdd(username: String, character: Character) {
         viewModelScope.launch {
             docActionRepository.addCharacter(character, username)
+            if (username == DocConstants.OWN_USERNAME && _savedSelection.value.start == document.content.lastIndex)
+                _savedSelection.value = TextRange(document.content.size)
+            _textFieldValue.value = TextFieldValue(
+                annotatedString = annotatedStringFromDocument(document.content),
+                selection = _savedSelection.value
+            )
         }
     }
 
     private fun handleRemove(username: String) {
         viewModelScope.launch {
             docActionRepository.removeCharacter(username)
+            _textFieldValue.value = TextFieldValue(
+                annotatedString = annotatedStringFromDocument(document.content),
+                selection = _savedSelection.value
+            )
         }
     }
 
     private fun handleEdit(username: String, config: CharacterConfig) {
         viewModelScope.launch {
             docActionRepository.editCharacter(username, config)
+            _textFieldValue.value = TextFieldValue(
+                annotatedString = annotatedStringFromDocument(document.content),
+                selection = _savedSelection.value
+            )
         }
     }
 
     private fun handleCursorUpdate(username: String, data: CursorData) {
         viewModelScope.launch {
             docActionRepository.updateCursor(data, username)
+            _savedSelection.value = TextRange(positionToIndex(document.content, data.start), positionToIndex(document.content, data.end ?: data.start))
+            _textFieldValue.value = textFieldValue.value.copy(
+                selection = _savedSelection.value
+            )
         }
     }
 
@@ -158,10 +193,5 @@ class DocViewModel(
             docActionRepository.closeDocument()
             _uiEvent.send(UiEvent.Navigate(to = Route.Home))
         }
-    }
-
-    private fun colorFromHex(hex: String): Color {
-        val colorInt = hex.removePrefix("#").toLong(16).toInt()
-        return Color(colorInt)
     }
 }

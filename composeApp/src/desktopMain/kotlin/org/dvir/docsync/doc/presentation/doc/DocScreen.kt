@@ -41,8 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -63,10 +61,12 @@ import org.dvir.docsync.core.ui.SurfaceColor
 import org.dvir.docsync.core.ui.TextColor
 import org.dvir.docsync.core.ui.UiEvent
 import org.dvir.docsync.doc.domain.cursor.CursorData
-import org.dvir.docsync.doc.domain.cursor.CursorPosition
 import org.dvir.docsync.doc.domain.model.Character
 import org.dvir.docsync.doc.domain.model.CharacterConfig
 import org.dvir.docsync.doc.domain.model.Document
+import org.dvir.docsync.doc.domain.utils.Colors
+import org.dvir.docsync.doc.domain.utils.Colors.colorFromHex
+import org.dvir.docsync.doc.domain.utils.CursorPosition.indexToPosition
 import org.dvir.docsync.doc.presentation.doc.viewmodel.DocEvent
 import org.dvir.docsync.doc.presentation.doc.viewmodel.DocViewModel
 import org.dvir.docsync.doc.presentation.doc.viewmodel.EditEvent
@@ -81,10 +81,6 @@ fun DocScreen(
     val snackBarHostState = remember { SnackbarHostState() }
 
     val focusRequester = remember { FocusRequester() }
-    val textFieldValue = remember {
-        mutableStateOf(TextFieldValue(annotatedStringFromDocument(document.content)))
-    }
-    val savedSelection = remember { mutableStateOf(TextRange(0, 0)) }
 
     LaunchedEffect(true) {
         viewModel.uiEvent.collect { event ->
@@ -239,7 +235,6 @@ fun DocScreen(
                             }
                             IconButton(
                                 onClick = {
-                                    textFieldValue.value = textFieldValue.value.copy(selection = savedSelection.value)
                                     viewModel.onEditEvent(
                                         EditEvent.ToggleBold
                                     )
@@ -317,7 +312,6 @@ fun DocScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             CustomTextEditor(
-                document = document.content,
                 onTextAdd = {
                     viewModel.onDocEvent(
                         DocEvent.AddCharacter(it)
@@ -351,12 +345,12 @@ fun DocScreen(
                     isBold = viewModel.isBold,
                     isItalic = viewModel.isItalic,
                     isUnderlined = viewModel.isUnderlined,
-                    color = String.format("#%08X", viewModel.color.toArgb()),
+                    color = Colors.hexFromColor(viewModel.color),
                     fontSize = viewModel.fontSize
                 ),
                 focusRequester = focusRequester,
-                textFieldValue = textFieldValue,
-                savedSelection = savedSelection
+                textFieldValue = viewModel.textFieldValue,
+                savedSelection = viewModel.savedSelection
             )
         }
     }
@@ -366,7 +360,6 @@ fun DocScreen(
 fun CustomTextEditor(
     textFieldValue: MutableState<TextFieldValue>,
     savedSelection: MutableState<TextRange>,
-    document: List<Character>,
     onTextAdd: (Character) -> Unit,
     onTextRemove: () -> Unit,
     onCursorChanged: (Int) -> Unit,
@@ -390,13 +383,7 @@ fun CustomTextEditor(
 
             if (newText.length > oldText.length) {
                 val cursorPosition = newValue.selection.start
-                val addedChar = if (cursorPosition < newText.length) {
-                    newText[cursorPosition - 1]
-                } else {
-                    newText.last()
-                }
-
-                val character = when (addedChar) {
+                val character = when (val addedChar = newText[cursorPosition - 1]) {
                     '\n' -> Character.BreakLine
                     ' ' -> Character.Space
                     else -> Character.Visible(addedChar, config)
@@ -405,11 +392,6 @@ fun CustomTextEditor(
             } else if (newText.length < oldText.length) {
                 onTextRemove()
             }
-
-            textFieldValue.value = newValue.copy(
-                annotatedString = annotatedStringFromDocument(document),
-                selection = newValue.selection
-            )
         },
         modifier = Modifier
             .fillMaxHeight()
@@ -447,25 +429,4 @@ fun annotatedStringFromDocument(document: List<Character>): AnnotatedString {
             }
         }
     }
-}
-
-
-fun indexToPosition(content: List<Character>, index: Int): CursorPosition {
-    var line = 0
-    var column = 0
-    for (i in 0 until index) {
-        if (i >= content.size) break
-        when (content[i]) {
-            is Character.BreakLine -> {
-                line++
-                column = 0
-            }
-            else -> column++
-        }
-    }
-    return CursorPosition(line, column)
-}
-fun colorFromHex(hex: String): Color {
-    val colorInt = hex.removePrefix("#").toLong(16).toInt()
-    return Color(colorInt)
 }
