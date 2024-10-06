@@ -24,7 +24,6 @@ import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.domain.repository.DocActionRepository
 import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
 import org.dvir.docsync.doc.domain.utils.Colors.colorFromHex
-import org.dvir.docsync.doc.domain.utils.CursorPosition.positionToIndex
 import org.dvir.docsync.doc.presentation.doc.annotatedStringFromDocument
 
 class DocViewModel(
@@ -174,10 +173,11 @@ class DocViewModel(
     private fun handleCursorUpdate(username: String, data: CursorData) {
         viewModelScope.launch {
             docActionRepository.updateCursor(data, username)
-            _savedSelection.value = TextRange(positionToIndex(document.content, data.start), positionToIndex(document.content, data.end ?: data.start))
-            _textFieldValue.value = textFieldValue.value.copy(
-                selection = _savedSelection.value
-            )
+            if (username == DocConstants.OWN_USERNAME) {
+                _textFieldValue.value = textFieldValue.value.copy(
+                    selection = _savedSelection.value
+                )
+            }
         }
     }
 
