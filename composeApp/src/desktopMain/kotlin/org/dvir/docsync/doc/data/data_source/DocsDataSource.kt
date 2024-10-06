@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.dvir.docsync.core.constants.Constants
 import org.dvir.docsync.doc.constants.DocConstants
 import org.dvir.docsync.doc.data.requests.DocAction
 import org.dvir.docsync.doc.data.requests.DocListAction
@@ -30,8 +31,8 @@ class DocsDataSource(
 
     suspend fun connect(token: String): Flow<DocResponse> = flow {
         httpClient.webSocket(
-            host = DocConstants.BASE_URL,
-            port = DocConstants.PORT,
+            host = Constants.API_URL,
+            port = Constants.PORT,
             path = DocConstants.ENDPOINT,
             request = {
                 header("Authorization", "Bearer $token")

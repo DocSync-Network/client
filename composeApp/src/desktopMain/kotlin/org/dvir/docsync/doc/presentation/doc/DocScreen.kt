@@ -387,7 +387,6 @@ fun CustomTextEditor(
 
                 onSelectionChanged(selectionRange)
             } else {
-                println("equal: ${newValue.selection}")
                 savedSelection.value = TextRange(newValue.selection.start)
                 onCursorChanged(newValue.selection.start)
             }
