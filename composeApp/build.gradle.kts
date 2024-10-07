@@ -46,7 +46,6 @@ kotlin {
             // koin
             implementation("io.insert-koin:koin-core:4.0.0")
             implementation("io.insert-koin:koin-compose-viewmodel:4.0.0")
-            implementation("io.insert-koin:koin-compose-viewmodel-navigation:4.0.0")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -55,13 +54,12 @@ kotlin {
     }
 }
 
-
 compose.desktop {
     application {
         mainClass = "org.dvir.docsync.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
             packageName = "org.dvir.docsync"
             packageVersion = "1.0.0"
         }
