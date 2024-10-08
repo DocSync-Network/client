@@ -1,11 +1,16 @@
 package org.dvir.docsync.doc.data.data_source
 
-import io.ktor.client.*
-import io.ktor.client.plugins.websocket.*
-import io.ktor.client.request.*
-import io.ktor.websocket.*
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.request.header
+import io.ktor.websocket.CloseReason
+import io.ktor.websocket.Frame
+import io.ktor.websocket.WebSocketSession
+import io.ktor.websocket.close
+import io.ktor.websocket.readText
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -60,7 +65,7 @@ class DocsDataSource(
                 close(CloseReason(CloseReason.Codes.NORMAL, "Session Closed"))
             }
         }
-    }
+    }.cancellable()
 
     suspend fun sendDocListAction(action: DocListAction) {
         sessionInitialized.await()

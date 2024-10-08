@@ -3,6 +3,7 @@ package org.dvir.docsync.doc.presentation.home.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -32,8 +33,10 @@ class HomeViewModel(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
+    private var responseJob: Job? = null
+
     init {
-        viewModelScope.launch {
+        responseJob = viewModelScope.launch {
             connectionManager.connect()
             docListRepository.getAllDocs()
             docsResponsesRepository.responseFlow.collect { response ->
@@ -46,6 +49,7 @@ class HomeViewModel(
                                         to = Route.Doc(doc = listResponse.doc)
                                     )
                                 )
+                                responseJob?.cancel()
                             }
                             is DocListResponse.Docs -> {
                                 docs.value = listResponse.docs
@@ -63,6 +67,11 @@ class HomeViewModel(
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        responseJob?.cancel()
     }
 
     fun onEvent(event: HomeEvent) {

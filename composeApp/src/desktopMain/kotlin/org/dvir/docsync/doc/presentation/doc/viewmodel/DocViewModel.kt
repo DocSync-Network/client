@@ -9,6 +9,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -49,8 +50,10 @@ class DocViewModel(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
+    private var responseJob: Job? = null
+
     init {
-        viewModelScope.launch {
+        responseJob = viewModelScope.launch {
             docsResponsesRepository.responseFlow.collect { response ->
                 when (response) {
                     is DocResponse.ActionResponse -> handleActionResponse(response.response)
@@ -63,6 +66,11 @@ class DocViewModel(
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        responseJob?.cancel()
     }
 
     fun onDocEvent(event: DocEvent) {
