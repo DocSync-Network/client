@@ -20,6 +20,7 @@ import org.dvir.docsync.doc.data.repository.DocActionRepositoryImpl
 import org.dvir.docsync.doc.data.repository.DocListRepositoryImpl
 import org.dvir.docsync.doc.domain.cursor.CursorManager
 import org.dvir.docsync.doc.domain.model.Document
+import org.dvir.docsync.doc.domain.repository.ConnectionManager
 import org.dvir.docsync.doc.domain.repository.DocActionRepository
 import org.dvir.docsync.doc.domain.repository.DocListRepository
 import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
@@ -70,6 +71,11 @@ val appModule = module {
             tokenService = get<TokenService>(),
         )
     }
+    single<ConnectionManager> {
+        ConnectionManager(
+            docsResponsesRepository = get<DocsResponsesRepository>()
+        )
+    }
     factory<DocActionRepository> { (document: Document, cursorManager: CursorManager) ->
         DocActionRepositoryImpl(
             dataSource = get<DocsDataSource>(),
@@ -77,13 +83,14 @@ val appModule = module {
             document = document
         )
     }
-    viewModel<HomeViewModel> {
+    factory<HomeViewModel> {
         HomeViewModel(
             docListRepository = get<DocListRepository>(),
-            docsResponsesRepository = get<DocsResponsesRepository>()
+            docsResponsesRepository = get<DocsResponsesRepository>(),
+            connectionManager = get<ConnectionManager>(),
         )
     }
-    viewModel { (document: Document, cursorManager: CursorManager) ->
+    factory<DocViewModel> { (document: Document, cursorManager: CursorManager) ->
         DocViewModel(
             docActionRepository = get { parametersOf(document, cursorManager) },
             docsResponsesRepository = get(),

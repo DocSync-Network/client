@@ -11,10 +11,12 @@ import org.dvir.docsync.core.ui.UiEvent
 import org.dvir.docsync.doc.data.responses.DocListResponse
 import org.dvir.docsync.doc.data.responses.DocResponse
 import org.dvir.docsync.doc.domain.model.Document
+import org.dvir.docsync.doc.domain.repository.ConnectionManager
 import org.dvir.docsync.doc.domain.repository.DocListRepository
 import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
 
 class HomeViewModel(
+    private val connectionManager: ConnectionManager,
     private val docListRepository: DocListRepository,
     private val docsResponsesRepository: DocsResponsesRepository
 ): ViewModel() {
@@ -32,7 +34,7 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch {
-            docsResponsesRepository.connect()
+            connectionManager.connect()
             docListRepository.getAllDocs()
             docsResponsesRepository.responseFlow.collect { response ->
                 when (response) {

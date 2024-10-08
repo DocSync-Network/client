@@ -7,6 +7,7 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dvir.docsync.core.constants.Constants
@@ -63,8 +64,16 @@ class DocsDataSource(
     }
 
     suspend fun sendDocListAction(action: DocListAction) {
+        println("Awaiting session initialization...")
         sessionInitialized.await()
-        session.send(Frame.Text(Json.encodeToString(action)))
+
+        if (session.isActive) {
+            println("Session is active, sending action")
+            session.send(Frame.Text(Json.encodeToString(action)))
+            println("Action sent successfully")
+        } else {
+            println("Session is not active, skipping send")
+        }
     }
 
     suspend fun sendDocAction(action: DocAction) {
