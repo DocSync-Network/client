@@ -11,6 +11,8 @@ interface DocActionRepository {
     suspend fun removeCharacter(username: String)
     suspend fun editCharacter(username: String, config: CharacterConfig)
     suspend fun updateCursor(cursorData: CursorData, username: String)
+
+    suspend fun addAccess(username: String)
     fun getCursors(): ConcurrentHashMap<String, CursorData>
     fun getConfig(cursorPosition: CursorPosition): CharacterConfig
     suspend fun saveDocument()

@@ -1,19 +1,16 @@
 package org.dvir.docsync.doc.presentation.doc
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
@@ -32,7 +29,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,33 +36,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.dvir.docsync.core.config.UserData
 import org.dvir.docsync.core.navigation.Route
 import org.dvir.docsync.core.ui.BackgroundColor
 import org.dvir.docsync.core.ui.ErrorColor
 import org.dvir.docsync.core.ui.PrimaryColor
 import org.dvir.docsync.core.ui.SecondaryColor
-import org.dvir.docsync.core.ui.SurfaceColor
 import org.dvir.docsync.core.ui.TextColor
 import org.dvir.docsync.core.ui.UiEvent
 import org.dvir.docsync.doc.domain.cursor.CursorData
-import org.dvir.docsync.doc.domain.model.Character
 import org.dvir.docsync.doc.domain.model.CharacterConfig
 import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.domain.utils.Colors
-import org.dvir.docsync.doc.domain.utils.Colors.colorFromHex
 import org.dvir.docsync.doc.domain.utils.CursorPosition.indexToPosition
+import org.dvir.docsync.doc.presentation.components.DefaultDialog
+import org.dvir.docsync.doc.presentation.doc.components.CustomTextEditor
 import org.dvir.docsync.doc.presentation.doc.viewmodel.DocEvent
 import org.dvir.docsync.doc.presentation.doc.viewmodel.DocViewModel
 import org.dvir.docsync.doc.presentation.doc.viewmodel.EditEvent
@@ -291,17 +278,19 @@ fun DocScreen(
                             }
                         }
                     }
-                    Text(
-                        text = "Access",
-                        fontSize = 16.sp,
-                        color = BackgroundColor,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.clickable {
-                            viewModel.onDocEvent(
-                                DocEvent.OpenAccessDialog
-                            )
-                        }.align(Alignment.CenterEnd)
-                    )
+                    if (UserData.username == document.owner) {
+                        Text(
+                            text = "Access",
+                            fontSize = 16.sp,
+                            color = BackgroundColor,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.clickable {
+                                viewModel.onDocEvent(
+                                    DocEvent.OpenAccessDialog
+                                )
+                            }.align(Alignment.CenterEnd)
+                        )
+                    }
                 }
             }
         }
@@ -353,91 +342,29 @@ fun DocScreen(
                 savedSelection = viewModel.savedSelection
             )
         }
-    }
-}
 
-@Composable
-fun CustomTextEditor(
-    textFieldValue: MutableState<TextFieldValue>,
-    savedSelection: MutableState<TextRange>,
-    onTextAdd: (Character) -> Unit,
-    onTextRemove: () -> Unit,
-    onCursorChanged: (Int) -> Unit,
-    onSelectionChanged: (IntRange) -> Unit,
-    config: CharacterConfig,
-    focusRequester: FocusRequester,
-) {
-    BasicTextField(
-        value = textFieldValue.value,
-        onValueChange = { newValue ->
-            val oldText = textFieldValue.value.text
-            val newText = newValue.text
-
-            if (newValue.selection.start != newValue.selection.end) {
-                val start = newValue.selection.start
-                val end = newValue.selection.end
-
-                val selectionRange = if (start < end) {
-                    start..end
-                } else {
-                    end..start
+        if (viewModel.isAccessDialogOpen) {
+            DefaultDialog(
+                header = "Add Access",
+                label = "Username",
+                primaryButtonText = "Add",
+                textFieldValue = viewModel.accessDialogTextFieldValue,
+                onTextFieldValueChange = { value ->
+                    viewModel.onDocEvent(
+                        DocEvent.OnAccessTextFieldValueChange(value)
+                    )
+                },
+                onDismiss = {
+                    viewModel.onDocEvent(
+                        DocEvent.CloseAccessDialog
+                    )
+                },
+                onAccept = {
+                    viewModel.onDocEvent(
+                        DocEvent.AddAccess
+                    )
                 }
-
-                savedSelection.value = TextRange(selectionRange.first, selectionRange.last)
-
-                onSelectionChanged(selectionRange)
-            } else {
-                savedSelection.value = TextRange(newValue.selection.start)
-                onCursorChanged(newValue.selection.start)
-            }
-
-
-            if (newText.length > oldText.length) {
-                val cursorPosition = newValue.selection.start
-                val character = when (val addedChar = newText[cursorPosition - 1]) {
-                    '\n' -> Character.BreakLine
-                    ' ' -> Character.Space
-                    else -> Character.Visible(addedChar, config)
-                }
-                onTextAdd(character)
-            } else if (newText.length < oldText.length) {
-                onTextRemove()
-            }
-        },
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(0.7f)
-            .focusRequester(focusRequester)
-            .background(BackgroundColor)
-            .padding(
-                top = 32.dp,
             )
-            .border(1.dp, SurfaceColor)
-            .padding(24.dp),
-    )
-}
-
-
-fun annotatedStringFromDocument(document: List<Character>): AnnotatedString {
-    return buildAnnotatedString {
-        document.forEach { character ->
-            when (character) {
-                is Character.Visible -> {
-                    withStyle(
-                        style = TextStyle(
-                            fontWeight = if (character.config.isBold) FontWeight.Bold else FontWeight.Normal,
-                            fontStyle = if (character.config.isItalic) FontStyle.Italic else FontStyle.Normal,
-                            textDecoration = if (character.config.isUnderlined) TextDecoration.Underline else TextDecoration.None,
-                            color = colorFromHex(character.config.color),
-                            fontSize = character.config.fontSize.sp
-                        ).toSpanStyle()
-                    ) {
-                        append(character.char.toString())
-                    }
-                }
-                Character.BreakLine -> append("\n")
-                Character.Space -> append(" ")
-            }
         }
     }
 }

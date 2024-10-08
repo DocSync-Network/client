@@ -13,6 +13,7 @@ import org.dvir.docsync.auth.data.responses.AuthResponse
 import org.dvir.docsync.auth.domain.data_source.AuthDataSource
 import org.dvir.docsync.auth.domain.data_source.Token
 import org.dvir.docsync.auth.constants.AuthConstants
+import org.dvir.docsync.core.config.UserData
 import org.dvir.docsync.core.result.Result
 
 class AuthDataSourceImpl(
@@ -32,6 +33,7 @@ class AuthDataSourceImpl(
         }
 
         return if (response.status == HttpStatusCode.OK) {
+            UserData.username = UserData.getUsernameFromJWT(token) ?: "x"
             Result.Success(true)
         } else {
             Result.Success(false)
@@ -54,6 +56,7 @@ class AuthDataSourceImpl(
         return if (authResponse is AuthResponse.ErrorResponse) {
             Result.Error(message = authResponse.error)
         } else {
+            UserData.username = username
             authResponse as AuthResponse.AuthCompleted
             return Result.Success(authResponse.token)
         }

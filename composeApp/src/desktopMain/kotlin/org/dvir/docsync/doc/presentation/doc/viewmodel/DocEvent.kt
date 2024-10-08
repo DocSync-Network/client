@@ -7,11 +7,13 @@ import org.dvir.docsync.doc.domain.model.Character
 sealed class DocEvent {
     data class AddCharacter(val char: Character) : DocEvent()
     data class UpdateCursor(val cursorData: CursorData) : DocEvent()
+    data class OnAccessTextFieldValueChange(val value: String) : DocEvent()
     data object RemoveCharacter : DocEvent()
     data object OpenColorDialog : DocEvent()
     data object CloseColorDialog : DocEvent()
     data object OpenAccessDialog : DocEvent()
     data object CloseAccessDialog : DocEvent()
+    data object AddAccess : DocEvent()
     data object SaveDocument : DocEvent()
     data object CloseDocument : DocEvent()
 }

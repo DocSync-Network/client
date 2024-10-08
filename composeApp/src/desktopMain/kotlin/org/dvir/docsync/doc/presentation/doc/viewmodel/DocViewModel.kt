@@ -5,8 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -25,7 +33,6 @@ import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.domain.repository.DocActionRepository
 import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
 import org.dvir.docsync.doc.domain.utils.Colors.colorFromHex
-import org.dvir.docsync.doc.presentation.doc.annotatedStringFromDocument
 
 class DocViewModel(
     private val docActionRepository: DocActionRepository,
@@ -40,12 +47,21 @@ class DocViewModel(
     val savedSelection = _savedSelection
 
     var isAccessDialogOpen by mutableStateOf(false)
+        private set
+    var accessDialogTextFieldValue by mutableStateOf("")
+        private set
     var isColorDialogOpen by mutableStateOf(false)
+        private set
     var isBold by mutableStateOf(false)
+        private set
     var isUnderlined by mutableStateOf(false)
+        private set
     var isItalic by mutableStateOf(false)
+        private set
     var color by mutableStateOf(Color.Black)
+        private set
     var fontSize by mutableStateOf(11)
+        private set
 
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
@@ -100,6 +116,12 @@ class DocViewModel(
                     fontSize = config.fontSize
                     color = colorFromHex(config.color)
                 }
+            }
+            is DocEvent.OnAccessTextFieldValueChange ->
+                accessDialogTextFieldValue = event.value
+            DocEvent.AddAccess -> viewModelScope.launch {
+                docActionRepository.addAccess(accessDialogTextFieldValue)
+                isAccessDialogOpen = false
             }
             DocEvent.SaveDocument -> saveDocument()
             DocEvent.CloseDocument -> closeDocument()
@@ -202,4 +224,29 @@ class DocViewModel(
             _uiEvent.send(UiEvent.Navigate(to = Route.Home))
         }
     }
+
+    private fun annotatedStringFromDocument(document: List<Character>): AnnotatedString {
+        return buildAnnotatedString {
+            document.forEach { character ->
+                when (character) {
+                    is Character.Visible -> {
+                        withStyle(
+                            style = TextStyle(
+                                fontWeight = if (character.config.isBold) FontWeight.Bold else FontWeight.Normal,
+                                fontStyle = if (character.config.isItalic) FontStyle.Italic else FontStyle.Normal,
+                                textDecoration = if (character.config.isUnderlined) TextDecoration.Underline else TextDecoration.None,
+                                color = colorFromHex(character.config.color),
+                                fontSize = character.config.fontSize.sp
+                            ).toSpanStyle()
+                        ) {
+                            append(character.char.toString())
+                        }
+                    }
+                    Character.BreakLine -> append("\n")
+                    Character.Space -> append(" ")
+                }
+            }
+        }
+    }
+
 }

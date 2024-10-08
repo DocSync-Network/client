@@ -119,6 +119,12 @@ class DocActionRepositoryImpl(
         dataSource.leaveDoc()
     }
 
+    override suspend fun addAccess(username: String) {
+        dataSource.sendDocAction(
+            DocAction.AddAccess(username)
+        )
+    }
+
     private fun removeSelection(username: String, startPos: CursorPosition, endPos: CursorPosition) {
         val startIndex = positionToIndex(document.content, startPos)
         val endIndex = positionToIndex(document.content, endPos)

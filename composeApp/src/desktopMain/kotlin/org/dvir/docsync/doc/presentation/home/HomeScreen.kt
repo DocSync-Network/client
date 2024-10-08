@@ -1,36 +1,40 @@
 package org.dvir.docsync.doc.presentation.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.dvir.docsync.core.navigation.Route
-import org.dvir.docsync.core.ui.*
-import org.dvir.docsync.doc.domain.model.Document
+import org.dvir.docsync.core.ui.BackgroundColor
+import org.dvir.docsync.core.ui.ErrorColor
+import org.dvir.docsync.core.ui.PrimaryColor
+import org.dvir.docsync.core.ui.UiEvent
+import org.dvir.docsync.doc.presentation.components.DefaultDialog
+import org.dvir.docsync.doc.presentation.home.components.DocumentCard
 import org.dvir.docsync.doc.presentation.home.viewmodel.HomeEvent
 import org.dvir.docsync.doc.presentation.home.viewmodel.HomeViewModel
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeScreen(
@@ -127,120 +131,17 @@ fun HomeScreen(
         }
 
         if (viewmodel.isCreateDialogOpened.value) {
-            CreateDocDialog(
-                nameValue = viewmodel.createDialogDocName.value,
-                onNameValueChange = {
-                    viewmodel.createDialogDocName.value = it
+            DefaultDialog(
+                header = "Create New Document",
+                label = "Document Name",
+                primaryButtonText = "Create",
+                textFieldValue = viewmodel.createDialogDocName.value,
+                onTextFieldValueChange = { value ->
+                    viewmodel.createDialogDocName.value = value
                 },
                 onDismiss = { viewmodel.onEvent(HomeEvent.CloseCreateDialog) },
-                onCreate = { viewmodel.onEvent(HomeEvent.CreateDoc) }
+                onAccept = { viewmodel.onEvent(HomeEvent.CreateDoc) }
             )
         }
     }
-}
-
-@Composable
-fun DocumentCard(
-    document: Document,
-    onDelete: () -> Unit,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(SecondaryColor)
-            .clickable(
-                onClick = onClick
-            )
-            .padding(16.dp)
-
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = document.name,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = TextColor,
-                    modifier = Modifier.clickable {
-                        onDelete()
-                    }
-                )
-            }
-
-            Text(
-                text = "Owner: ${document.owner}",
-                fontSize = 16.sp,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-
-            val creationDate = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(document.creationDate),
-                ZoneId.systemDefault()
-            ).format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
-
-            Text(
-                text = creationDate,
-                fontSize = 16.sp,
-            )
-        }
-    }
-}
-
-@Composable
-fun CreateDocDialog(
-    nameValue: String,
-    onNameValueChange: (String) -> Unit,
-    onDismiss: () -> Unit,
-    onCreate: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        text = {
-            Column {
-                Text(
-                    text = "Create New Document",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = nameValue,
-                    onValueChange = onNameValueChange,
-                    label = { Text("Document Name") },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = PrimaryColor
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = PrimaryColor,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(25.dp),
-                onClick = onCreate
-            ) {
-                Text("Create")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = PrimaryColor)
-            }
-        }
-    )
 }
