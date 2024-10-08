@@ -13,7 +13,6 @@ class DocListRepositoryImpl(
     }
 
     override suspend fun createDoc(docName: String) {
-        println("creating doc")
         dataSource.sendDocListAction(DocListAction.CreateDoc(docName))
     }
 
