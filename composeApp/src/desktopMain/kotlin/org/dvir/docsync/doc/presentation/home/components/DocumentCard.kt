@@ -30,6 +30,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DocumentCard(
     document: Document,
+    showDelete: Boolean,
     onDelete: () -> Unit,
     onClick: () -> Unit
 ) {
@@ -56,14 +57,16 @@ fun DocumentCard(
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = TextColor,
-                    modifier = Modifier.clickable {
-                        onDelete()
-                    }
-                )
+                if (showDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = TextColor,
+                        modifier = Modifier.clickable {
+                            onDelete()
+                        }
+                    )
+                }
             }
 
             Text(

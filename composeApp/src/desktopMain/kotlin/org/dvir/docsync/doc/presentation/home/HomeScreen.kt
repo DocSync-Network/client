@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.dvir.docsync.core.config.UserData
 import org.dvir.docsync.core.navigation.Route
 import org.dvir.docsync.core.ui.BackgroundColor
 import org.dvir.docsync.core.ui.ErrorColor
@@ -113,6 +114,7 @@ fun HomeScreen(
                 items(viewmodel.docs.value) { document ->
                     DocumentCard(
                         document,
+                        showDelete = document.owner == UserData.username,
                         onDelete = {
                             viewmodel.onEvent(
                                 HomeEvent.DeleteDoc(document.id)
