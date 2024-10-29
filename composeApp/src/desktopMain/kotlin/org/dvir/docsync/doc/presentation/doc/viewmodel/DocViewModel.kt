@@ -43,6 +43,7 @@ class DocViewModel(
         TextFieldValue(annotatedStringFromDocument(document.content))
     )
     val textFieldValue = _textFieldValue
+
     private val _savedSelection = mutableStateOf(TextRange(0, 0))
     val savedSelection = _savedSelection
 
@@ -109,7 +110,7 @@ class DocViewModel(
             is DocEvent.UpdateCursor -> {
                 handleCursorUpdate(DocConstants.OWN_USERNAME, event.cursorData)
                 if (event.cursorData.end != null) {
-                    val config = docActionRepository.getConfig(event.cursorData.start)
+                    val config = docActionRepository.getConfig(event.cursorData)
                     isBold = config.isBold
                     isItalic = config.isItalic
                     isUnderlined = config.isUnderlined

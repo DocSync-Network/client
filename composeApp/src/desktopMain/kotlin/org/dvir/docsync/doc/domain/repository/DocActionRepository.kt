@@ -1,7 +1,6 @@
 package org.dvir.docsync.doc.domain.repository
 
 import org.dvir.docsync.doc.domain.cursor.CursorData
-import org.dvir.docsync.doc.domain.cursor.CursorPosition
 import org.dvir.docsync.doc.domain.model.CharacterConfig
 import org.dvir.docsync.doc.domain.model.Character
 import java.util.concurrent.ConcurrentHashMap
@@ -14,7 +13,7 @@ interface DocActionRepository {
 
     suspend fun addAccess(username: String)
     fun getCursors(): ConcurrentHashMap<String, CursorData>
-    fun getConfig(cursorPosition: CursorPosition): CharacterConfig
+    fun getConfig(cursorData: CursorData): CharacterConfig
     suspend fun saveDocument()
     suspend fun closeDocument()
 }

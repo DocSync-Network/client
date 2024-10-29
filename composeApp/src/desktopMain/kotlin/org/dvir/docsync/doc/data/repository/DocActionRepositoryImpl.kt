@@ -14,6 +14,8 @@ import org.dvir.docsync.doc.domain.model.Character
 import org.dvir.docsync.doc.domain.utils.CursorPosition.indexToPosition
 import org.dvir.docsync.doc.domain.utils.CursorPosition.positionToIndex
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.max
+import kotlin.math.min
 
 class DocActionRepositoryImpl(
     private val dataSource: DocsDataSource,
@@ -93,27 +95,51 @@ class DocActionRepositoryImpl(
     }
 
     override fun getCursors(): ConcurrentHashMap<String, CursorData> = cursorManager.getCursors()
-    override fun getConfig(cursorPosition: CursorPosition): CharacterConfig {
-        val character = document.content[positionToIndex(document.content, cursorPosition)]
-
-        return if (character is Character.Visible) {
-            character.config
-        } else {
-            CharacterConfig(
-                isBold = false,
-                isItalic = false,
-                isUnderlined = false,
-                color = "#FF000000",
-                fontSize = 11
-            )
+    override fun getConfig(cursorData: CursorData): CharacterConfig {
+        if (cursorData.end == null) {
+            val character = document.content[positionToIndex(document.content, cursorData.start)]
+            return if (character is Character.Visible) {
+                character.config
+            } else {
+                CharacterConfig(
+                    isBold = false,
+                    isItalic = false,
+                    isUnderlined = false,
+                    color = "#FF000000",
+                    fontSize = 11
+                )
+            }
         }
+
+        val start = min(
+            positionToIndex(document.content, cursorData.start),
+            positionToIndex(document.content, cursorData.end)
+        )
+        val end = max(
+            positionToIndex(document.content, cursorData.start),
+            positionToIndex(document.content, cursorData.end)
+        )
+        val charRange = document.content.subList(
+            fromIndex = start,
+            toIndex = end
+        )
+        charRange.forEach { character ->
+            if (character is Character.Visible) {
+                return character.config
+            }
+        }
+        return CharacterConfig(
+            isBold = false,
+            isItalic = false,
+            isUnderlined = false,
+            color = "#FF000000",
+            fontSize = 11
+        )
     }
 
     override suspend fun saveDocument() {
         dataSource.sendDocAction(DocAction.Save)
     }
-
-
 
     override suspend fun closeDocument() {
         dataSource.leaveDoc()

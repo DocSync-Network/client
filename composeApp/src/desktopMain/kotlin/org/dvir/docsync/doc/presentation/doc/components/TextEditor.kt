@@ -38,18 +38,12 @@ fun CustomTextEditor(
             val newText = newValue.text
 
             if (newValue.selection.start != newValue.selection.end) {
-                val start = newValue.selection.start
-                val end = newValue.selection.end
+                val start = newValue.selection.start.coerceAtMost(newValue.text.length)
+                val end = newValue.selection.end.coerceAtMost(newValue.text.length)
 
-                val selectionRange = if (start < end) {
-                    start..end
-                } else {
-                    end..start
-                }
+                savedSelection.value = TextRange(start, end)
 
-                savedSelection.value = TextRange(selectionRange.first, selectionRange.last)
-
-                onSelectionChanged(selectionRange)
+                onSelectionChanged(start .. end)
             } else {
                 savedSelection.value = TextRange(newValue.selection.start)
                 onCursorChanged(newValue.selection.start)
