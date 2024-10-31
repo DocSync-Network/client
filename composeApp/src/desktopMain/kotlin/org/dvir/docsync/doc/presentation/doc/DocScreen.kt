@@ -57,6 +57,8 @@ import org.dvir.docsync.doc.presentation.doc.components.CustomTextEditor
 import org.dvir.docsync.doc.presentation.doc.viewmodel.DocEvent
 import org.dvir.docsync.doc.presentation.doc.viewmodel.DocViewModel
 import org.dvir.docsync.doc.presentation.doc.viewmodel.EditEvent
+import kotlin.math.max
+import kotlin.math.min
 
 @Composable
 fun DocScreen(
@@ -321,11 +323,14 @@ fun DocScreen(
                     )
                 },
                 onSelectionChanged = {
+                    val start = min(it.first, it.last)
+                    val end = max(it.first, it.last)
+
                     viewModel.onDocEvent(
                         DocEvent.UpdateCursor(
                             CursorData(
-                                start = indexToPosition(document.content, it.first),
-                                end = indexToPosition(document.content, it.last)
+                                start = indexToPosition(document.content, start),
+                                end = indexToPosition(document.content, end)
                             )
                         )
                     )
@@ -339,7 +344,8 @@ fun DocScreen(
                 ),
                 focusRequester = focusRequester,
                 textFieldValue = viewModel.textFieldValue,
-                savedSelection = viewModel.savedSelection
+                savedSelection = viewModel.savedSelection,
+                previousSelection = viewModel.previousSelection
             )
         }
 

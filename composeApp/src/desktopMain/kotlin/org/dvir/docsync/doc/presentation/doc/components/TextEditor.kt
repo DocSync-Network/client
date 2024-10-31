@@ -23,6 +23,7 @@ import org.dvir.docsync.doc.domain.model.CharacterConfig
 @Composable
 fun CustomTextEditor(
     textFieldValue: MutableState<TextFieldValue>,
+    previousSelection: MutableState<TextRange>,
     savedSelection: MutableState<TextRange>,
     onTextAdd: (Character) -> Unit,
     onTextRemove: () -> Unit,
@@ -44,11 +45,11 @@ fun CustomTextEditor(
                 savedSelection.value = TextRange(start, end)
 
                 onSelectionChanged(start .. end)
-            } else {
+            } else if (newValue.selection.start == newValue.selection.end) {
+                previousSelection.value = savedSelection.value
                 savedSelection.value = TextRange(newValue.selection.start)
                 onCursorChanged(newValue.selection.start)
             }
-
 
             if (newText.length > oldText.length) {
                 val cursorPosition = newValue.selection.start

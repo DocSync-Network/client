@@ -33,6 +33,9 @@ import org.dvir.docsync.doc.domain.model.Document
 import org.dvir.docsync.doc.domain.repository.DocActionRepository
 import org.dvir.docsync.doc.domain.repository.DocsResponsesRepository
 import org.dvir.docsync.doc.domain.utils.Colors.colorFromHex
+import org.dvir.docsync.doc.domain.utils.CursorPosition
+import kotlin.math.max
+import kotlin.math.min
 
 class DocViewModel(
     private val docActionRepository: DocActionRepository,
@@ -43,6 +46,9 @@ class DocViewModel(
         TextFieldValue(annotatedStringFromDocument(document.content))
     )
     val textFieldValue = _textFieldValue
+
+    private val _previousSelection = mutableStateOf(TextRange(0, 0))
+    val previousSelection = _previousSelection
 
     private val _savedSelection = mutableStateOf(TextRange(0, 0))
     val savedSelection = _savedSelection
@@ -134,8 +140,20 @@ class DocViewModel(
     }
 
     fun onEditEvent(event: EditEvent) {
+        if (_previousSelection.value.start != _previousSelection.value.end) {
+            val start = min(_previousSelection.value.start, _previousSelection.value.end)
+            val end = max(_previousSelection.value.start, _previousSelection.value.end)
+            handleCursorUpdate(
+                DocConstants.OWN_USERNAME,
+                CursorData(
+                    start = CursorPosition.indexToPosition(document.content, start),
+                    end = CursorPosition.indexToPosition(document.content, end)
+                )
+            )
+            _savedSelection.value = _previousSelection.value
+        }
         _textFieldValue.value = textFieldValue.value.copy(
-            selection = savedSelection.value
+            selection = savedSelection.value,
         )
         when (event) {
             is EditEvent.ChangeColor -> color = event.color
@@ -146,7 +164,7 @@ class DocViewModel(
             EditEvent.ToggleUnderLine -> isUnderlined = !isUnderlined
         }
         viewModelScope.launch {
-            docActionRepository.editCharacter(
+            handleEdit(
                 username = DocConstants.OWN_USERNAME,
                 config = CharacterConfig(
                     isBold = isBold,
@@ -249,5 +267,4 @@ class DocViewModel(
             }
         }
     }
-
 }
