@@ -112,7 +112,10 @@ class DocViewModel(
                     )
                 else event.char
             )
-            is DocEvent.RemoveCharacter -> handleRemove(DocConstants.OWN_USERNAME)
+            is DocEvent.RemoveCharacter -> {
+                fixSelectionCursor()
+                handleRemove(DocConstants.OWN_USERNAME)
+            }
             is DocEvent.UpdateCursor -> {
                 handleCursorUpdate(DocConstants.OWN_USERNAME, event.cursorData)
                 if (event.cursorData.end != null) {
@@ -140,18 +143,7 @@ class DocViewModel(
     }
 
     fun onEditEvent(event: EditEvent) {
-        if (_previousSelection.value.start != _previousSelection.value.end) {
-            val start = min(_previousSelection.value.start, _previousSelection.value.end)
-            val end = max(_previousSelection.value.start, _previousSelection.value.end)
-            handleCursorUpdate(
-                DocConstants.OWN_USERNAME,
-                CursorData(
-                    start = CursorPosition.indexToPosition(document.content, start),
-                    end = CursorPosition.indexToPosition(document.content, end)
-                )
-            )
-            _savedSelection.value = _previousSelection.value
-        }
+        fixSelectionCursor()
         _textFieldValue.value = textFieldValue.value.copy(
             selection = savedSelection.value,
         )
@@ -265,6 +257,21 @@ class DocViewModel(
                     Character.Space -> append(" ")
                 }
             }
+        }
+    }
+
+    private fun fixSelectionCursor() {
+        if (_previousSelection.value.start != _previousSelection.value.end) {
+            val start = min(_previousSelection.value.start, _previousSelection.value.end)
+            val end = max(_previousSelection.value.start, _previousSelection.value.end)
+            handleCursorUpdate(
+                DocConstants.OWN_USERNAME,
+                CursorData(
+                    start = CursorPosition.indexToPosition(document.content, start),
+                    end = CursorPosition.indexToPosition(document.content, end)
+                )
+            )
+            _savedSelection.value = _previousSelection.value
         }
     }
 }
