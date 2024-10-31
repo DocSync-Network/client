@@ -42,6 +42,7 @@ fun CustomTextEditor(
                 val start = newValue.selection.start.coerceAtMost(newValue.text.length)
                 val end = newValue.selection.end.coerceAtMost(newValue.text.length)
 
+                previousSelection.value = savedSelection.value
                 savedSelection.value = TextRange(start, end)
 
                 onSelectionChanged(start .. end)

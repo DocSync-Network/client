@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
@@ -36,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,6 +70,8 @@ fun DocScreen(
     document: Document,
     onNavigateBack: () -> Unit
 ) {
+    val colorOptions = listOf(Color.Black, Color.DarkGray, Color.Red, Color.Green, Color.Blue, Color.Magenta)
+
     var snackBarColor by remember { mutableStateOf(PrimaryColor) }
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -167,18 +173,45 @@ fun DocScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(
-                                onClick = {
-                                    viewModel.onDocEvent(
-                                        DocEvent.OpenColorDialog
+                            Row {
+                                IconButton(
+                                    onClick = {
+                                        viewModel.onDocEvent(
+                                            DocEvent.OpenColorDialog
+                                        )
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.FormatColorText,
+                                        contentDescription = "Change Color",
+                                        tint = BackgroundColor
                                     )
                                 }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.FormatColorText,
-                                    contentDescription = "Change Color",
-                                    tint = BackgroundColor
-                                )
+                                DropdownMenu(
+                                    expanded = viewModel.isColorDialogOpen,
+                                    onDismissRequest = {
+                                        viewModel.onDocEvent(
+                                            DocEvent.CloseColorDialog
+                                        )
+                                    }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        colorOptions.forEach { colorOption ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .background(colorOption, shape = CircleShape)
+                                                    .clickable {
+                                                        viewModel.onEditEvent(EditEvent.ChangeColor(colorOption))
+                                                        viewModel.onDocEvent(DocEvent.CloseColorDialog)
+                                                    }
+                                            )
+                                        }
+                                    }
+                                }
                             }
                             IconButton(
                                 onClick = {
