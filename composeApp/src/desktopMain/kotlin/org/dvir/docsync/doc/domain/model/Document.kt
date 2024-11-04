@@ -13,6 +13,7 @@ data class Document(
     val owner: String,
     val name: String,
     val creationDate: Long,
+    val editedDetails: MutableList<String>,
     val access: MutableList<String>,
     val content: MutableList<Character>,
 ) {

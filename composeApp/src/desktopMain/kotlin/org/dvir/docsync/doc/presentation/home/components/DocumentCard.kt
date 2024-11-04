@@ -84,6 +84,17 @@ fun DocumentCard(
                 text = creationDate,
                 fontSize = 16.sp,
             )
+
+            if (document.editedDetails.size == 2) {
+                val editDate = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(document.editedDetails[1].toLong()),
+                    ZoneId.systemDefault()
+                ).format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+                Text(
+                    text = "Last edited by ${document.editedDetails[0]} at $editDate",
+                    fontSize = 8.sp,
+                )
+            }
         }
     }
 }
